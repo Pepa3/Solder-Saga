@@ -1,27 +1,26 @@
 extends CharacterBody3D
 @export var speed = 14
-@export var fall_acceleration = 75
+@export var mouse_sensitivity = -0.005
+@export var jump_impulse = 5
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var target_velocity = Vector3.ZERO
-func _physics_process(delta):
-	var direction = Vector3.ZERO
 
-	if Input.is_action_pressed("move_right"):
-		direction.x += 1
-	if Input.is_action_pressed("move_left"):
-		direction.x -= 1
-	if Input.is_action_pressed("move_back"):
-		direction.z += 1
-	if Input.is_action_pressed("move_forward"):
-		direction.z -= 1
-	if direction != Vector3.ZERO:
-		direction = direction.normalized()
-		$Pivot.basis = Basis.looking_at(direction)
+func _physics_process(delta):
+	var input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var movement_dir = transform.basis * Vector3(input.x, 0, input.y)
+	velocity.x = movement_dir.x * speed
+	velocity.z = movement_dir.z * speed
 	
-	target_velocity.x = direction.x * speed
-	target_velocity.z = direction.z * speed
-	
+	if is_on_floor() and Input.is_action_pressed("jump"):
+		velocity.y = jump_impulse
+		
 	if not is_on_floor():
-		target_velocity.y = target_velocity.y - (fall_acceleration * delta)
-	
-	velocity = target_velocity
+		velocity.y = velocity.y - (gravity * delta)
+		
 	move_and_slide()
+
+func _unhandled_input(event):
+	if event is InputEventMouseMotion && Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		rotate_y(event.relative.x*mouse_sensitivity)
+		$Camera.rotate_x(event.relative.y*mouse_sensitivity)
+	
