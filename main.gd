@@ -1,6 +1,7 @@
 extends Node
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	#DCCircuitSolver.new()._test_simple_circuit()
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
